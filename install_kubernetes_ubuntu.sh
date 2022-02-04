@@ -130,7 +130,7 @@ RequireFolder()
 #endregion
 
 INSTALL_DOCKER_CE_VERSION='5:19.03.10~3-0~ubuntu-focal'
-INSTALL_KUBE_VERSION='1.21'
+INSTALL_KUBE_VERSION='1.21.9-00'
 INSTALL_CALICO_VERSION='v3.22'
 
 
@@ -186,16 +186,19 @@ fi
 }
 
 #Install Kubernetes components
-apt update && apt install -y kubeadm kubelet kubectl
+apt update && apt install -y kubeadm=$INSTALL_KUBE_VERSION kubelet=$INSTALL_KUBE_VERSION kubectl=$INSTALL_KUBE_VERSION
 
 if $IS_MASTER_NODE; then
   #Initialize Kubernetes Cluster
   kubeadm init --apiserver-advertise-address=$EXTERNAL_IP --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=all
+  export KUBECONFIG='/etc/kubernetes/admin.conf'
+  #Remove the taints on the master so that you can schedule pods on it.
+  kubectl taint nodes --all node-role.kubernetes.io/master-
   #Deploy Calico network
-  kubectl --kubeconfig=/etc/kubernetes/admin.conf create -f https://docs.projectcalico.org/$INSTALL_CALICO_VERSION/manifests/calico.yaml
+  kubectl create -f https://docs.projectcalico.org/$INSTALL_CALICO_VERSION/manifests/calico.yaml
   #Cluster join command
   kubeadm token create --print-join-command
 fi
 
 #Remove the taints on the master so that you can schedule pods on it.
-kubectl --kubeconfig=/etc/kubernetes/admin.conf taint nodes --all node-role.kubernetes.io/master-
+kubectl taint nodes --all node-role.kubernetes.io/master- > /dev/null 2>/dev/null
