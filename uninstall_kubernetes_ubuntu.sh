@@ -1,3 +1,6 @@
+# Original: https://github.com/justmeandopensource/kubernetes/tree/master/docs
+# wget https://raw.githubusercontent.com/Davidnovarro/utility/main/uninstall_kubernetes_ubuntu.sh
+# sh uninstall_kubernetes_ubuntu.sh
 if [ "$(id -u)" -ne 0 ]; then
         echo 'This script must be run by root' >&2
         exit 1

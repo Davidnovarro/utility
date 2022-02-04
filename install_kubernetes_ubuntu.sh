@@ -1,3 +1,6 @@
+# Original: https://github.com/justmeandopensource/kubernetes/tree/master/docs
+# wget https://raw.githubusercontent.com/Davidnovarro/utility/main/install_kubernetes_ubuntu.sh
+# sh install_kubernetes_ubuntu.sh
 #Get script location base path
 BASE_PATH=$(readlink -f "$0" | xargs dirname)
 
@@ -183,7 +186,7 @@ fi
 }
 
 #Install Kubernetes components
-apt update && apt install -y kubeadm=$INSTALL_KUBE_VERSION kubelet=$INSTALL_KUBE_VERSION kubectl=$INSTALL_KUBE_VERSION
+apt update && apt install -y kubeadm kubelet kubectl
 
 if $IS_MASTER_NODE; then
   #Initialize Kubernetes Cluster
