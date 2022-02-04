@@ -9,8 +9,8 @@ apt-get purge -y docker-ce containerd.io
 apt-get purge -y kubeadm kubectl kubelet kubernetes-cni kube*
 sudo apt-get autoremove -y
 
-rm -r /etc/cni/net.d
-rm -r /etc/kubernetes
+rm -rf /etc/cni/net.d
+rm -rf /etc/kubernetes
 rm -rf ~/.kube
 
 iptables -F
