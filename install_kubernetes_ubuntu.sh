@@ -2,7 +2,7 @@
 BASE_PATH=$(readlink -f "$0" | xargs dirname)
 
 #region FUNCTIONS
-function ReadYesNo()
+ReadYesNo()
 {
     while true; do
         read -p "$1 (Y/N)" yn
@@ -20,7 +20,7 @@ function ReadYesNo()
     done
 }
 
-function ReadFolderPath()
+ReadFolderPath()
 {
     while true; do
         read -p "$1 : " FOLDER_PATH
@@ -40,7 +40,7 @@ function ReadFolderPath()
     done
 }
 
-function GetRelativeOrReadFolderPath()
+GetRelativeOrReadFolderPath()
 {
     local relative=$1
     if [[ "$relative" != */ ]]
@@ -62,7 +62,7 @@ function GetRelativeOrReadFolderPath()
     fi
 }
 
-function ReadFilePath()
+ReadFilePath()
 {
     while true; do
         read -p "$1 : " FILE_PATH
@@ -77,7 +77,7 @@ function ReadFilePath()
     done
 }
 
-function GetRelativeOrReadFilePath()
+GetRelativeOrReadFilePath()
 {
     local relative=$1
     
@@ -95,12 +95,12 @@ function GetRelativeOrReadFilePath()
     fi
 }
 
-function ReadTextInput()
+ReadTextInput()
 {
     read -p "$1 : " TEXT_INPUT
 }
 
-function RequireCommand()
+RequireCommand()
 {
     if ! [ -x "$(command -v $1)" ]; then
         echo "Error: $1 is not installed."
@@ -108,7 +108,7 @@ function RequireCommand()
     fi
 }
 
-function RequireFile()
+RequireFile()
 {
   if ! [ -f "$1" ];then
       echo "File does not exist $1"
@@ -116,7 +116,7 @@ function RequireFile()
   fi
 }
 
-function RequireFolder()
+RequireFolder()
 {
     if ! [ -d "$1" ];then
         echo "Folder does not exist $1"
@@ -141,7 +141,7 @@ IS_MASTER_NODE=$YES
 
 ReadTextInput "Please input a unique name for a node"
 
-  EXTERNAL_IP=$(host myip.opendns.com resolver1.opendns.com | grep "myip.opendns.com has" | awk '{print $4}')
+EXTERNAL_IP=$(host myip.opendns.com resolver1.opendns.com | grep "myip.opendns.com has" | awk '{print $4}')
 
 sudo hostnamectl set-hostname $TEXT_INPUT
 
