@@ -1,6 +1,7 @@
 # Original: https://github.com/justmeandopensource/kubernetes/tree/master/docs
 # wget https://raw.githubusercontent.com/Davidnovarro/utility/main/install_kubernetes_ubuntu.sh
 # sh install_kubernetes_ubuntu.sh
+# If not a master node then, on master node create token to join the cluster: kubeadm token create --print-join-command
 #Get script location base path
 BASE_PATH=$(readlink -f "$0" | xargs dirname)
 
@@ -143,10 +144,12 @@ ReadYesNo "Is this a Master Node?"
 IS_MASTER_NODE=$YES
 
 ReadTextInput "Please input a unique name for a node"
+sudo hostnamectl set-hostname $TEXT_INPUT
 
 EXTERNAL_IP=$(host myip.opendns.com resolver1.opendns.com | grep "myip.opendns.com has" | awk '{print $4}')
 
-sudo hostnamectl set-hostname $TEXT_INPUT
+sudo apt update && sudo apt upgrade
+sudo apt -y install curl
 
 #Disable Firewall
 ufw disable
