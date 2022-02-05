@@ -132,7 +132,8 @@ RequireFolder()
 
 INSTALL_DOCKER_CE_VERSION='5:19.03.10~3-0~ubuntu-focal'
 INSTALL_KUBE_VERSION='1.21.9-00'
-INSTALL_CALICO_VERSION='v3.22'
+#ATTENTION! In newer versions of CALICO Game Servers are unable to send UDP for short period of time right after Agones Allocation is changed
+INSTALL_CALICO_VERSION='v3.14'
 
 
 if [ "$(id -u)" -ne 0 ]; then
