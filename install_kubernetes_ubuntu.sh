@@ -130,8 +130,15 @@ RequireFolder()
 
 #endregion
 
-INSTALL_DOCKER_CE_VERSION='5:19.03.10~3-0~ubuntu-focal'
-INSTALL_KUBE_VERSION='1.21.9-00'
+#HOW TO LIST ALL THE VEERSIONS?
+#apt update
+#apt-cache madison docker-ce
+#apt-cache madison kubeadm
+#apt-cache madison kubelet
+#apt-cache madison kubectl
+
+INSTALL_DOCKER_CE_VERSION='5:20.10.18~3-0~ubuntu-focal'
+INSTALL_KUBE_VERSION='1.25.2-00'
 #ATTENTION! In newer versions of CALICO Game Servers are unable to send UDP for short period of time right after Agones Allocation is changed
 INSTALL_CALICO_VERSION='v3.14'
 
