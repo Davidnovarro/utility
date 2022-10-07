@@ -1,7 +1,14 @@
-# Original: https://github.com/justmeandopensource/kubernetes/tree/master/docs
-# wget https://raw.githubusercontent.com/Davidnovarro/utility/main/install_kubernetes_ubuntu.sh
-# sh install_kubernetes_ubuntu.sh
+# How to use?
+#       wget https://raw.githubusercontent.com/Davidnovarro/utility/main/install_kubernetes_ubuntu.sh
+#       sh install_kubernetes_ubuntu.sh
 # If not a master node then, on master node create token to join the cluster: kubeadm token create --print-join-command
+# Instructions are from:
+# https://github.com/justmeandopensource/kubernetes/tree/master/docs
+# https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+# https://kubernetes.io/docs/setup/production-environment/container-runtimes/
+# https://docs.docker.com/engine/install/ubuntu/
+# https://projectcalico.docs.tigera.io/getting-started/kubernetes/quickstart
+# !ATTENTION! In newer versions of CALICO (newer than v3.14) Game Servers are may be unable to send UDP packages for short period of time right after Agones Allocation is changed
 #Get script location base path
 BASE_PATH=$(readlink -f "$0" | xargs dirname)
 
@@ -134,13 +141,8 @@ RequireFolder()
 #apt update
 #apt-cache madison docker-ce
 #apt-cache madison kubeadm
-#apt-cache madison kubelet
-#apt-cache madison kubectl
-
-INSTALL_DOCKER_CE_VERSION='5:20.10.18~3-0~ubuntu-focal'
 INSTALL_KUBE_VERSION='1.25.2-00'
-#ATTENTION! In newer versions of CALICO Game Servers are unable to send UDP for short period of time right after Agones Allocation is changed
-INSTALL_CALICO_VERSION='v3.14'
+INSTALL_CALICO_VERSION='v3.24.1'
 
 
 if [ "$(id -u)" -ne 0 ]; then
@@ -152,7 +154,8 @@ ReadYesNo "Is this a Master Node?"
 IS_MASTER_NODE=$YES
 
 ReadTextInput "Please input a unique name for a node"
-sudo hostnamectl set-hostname $TEXT_INPUT
+HOST_NAME=$TEXT_INPUT
+sudo hostnamectl set-hostname $HOST_NAME
 
 EXTERNAL_IP=$(host myip.opendns.com resolver1.opendns.com | grep "myip.opendns.com has" | awk '{print $4}')
 
@@ -165,51 +168,68 @@ ufw disable
 #Disable swap
 swapoff -a; sed -i '/swap/d' /etc/fstab
 
-
-#Update sysctl settings for Kubernetes networking
-sysctl_settings=$(cat /etc/sysctl.d/kubernetes.conf | grep "net.bridge.bridge-nf-call-ip6tables\|net.bridge.bridge-nf-call-iptables")
-
-if [ ${#sysctl_settings} -gt 0 ]; then echo "Skipping: sysctl settings for Kubernetes networking" ;
-else
-cat >>/etc/sysctl.d/kubernetes.conf<<EOF
-net.bridge.bridge-nf-call-ip6tables = 1
-net.bridge.bridge-nf-call-iptables = 1
+#Prepeare to install container runtime : https://kubernetes.io/docs/setup/production-environment/container-runtimes/
+cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+overlay
+br_netfilter
 EOF
+
+sudo modprobe overlay
+sudo modprobe br_netfilter
+
+# sysctl params required by setup, params persist across reboots
+cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+EOF
+
 sysctl --system
+
+if [[ $(tail -1 /etc/hosts) != *"${EXTERNAL_IP}"* ]]; then
+  echo "${HOST_NAME} ${EXTERNAL_IP}" >> "/etc/hosts"
 fi
 
+#Install containerd as container runtime
+cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf
+overlay
+br_netfilter
+EOF
 
-#Install docker engine
-{
-  sudo apt-get remove docker docker-engine docker.io containerd runc
-  apt install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-  add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-  apt update
-  apt install -y docker-ce=$INSTALL_DOCKER_CE_VERSION containerd.io
-}
+sudo sysctl --system
+
+sudo apt install curl gnupg2 software-properties-common apt-transport-https ca-certificates -y
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt update
+sudo apt install containerd.io -y
+mkdir -p /etc/containerd
+containerd config default>/etc/containerd/config.toml
+sudo systemctl restart containerd
+sudo systemctl enable containerd
 
 #Kubernetes Setup
 #Add Apt repository
-{
-  curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-  echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
-}
-
-#Install Kubernetes components
-apt update && apt install -y kubeadm=$INSTALL_KUBE_VERSION kubelet=$INSTALL_KUBE_VERSION kubectl=$INSTALL_KUBE_VERSION
+sudo apt-get install -y apt-transport-https ca-certificates curl
+sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo apt-get update
+sudo apt-get install -y kubelet=$INSTALL_KUBE_VERSION kubeadm=$INSTALL_KUBE_VERSION kubectl=$INSTALL_KUBE_VERSION
+sudo apt-mark hold kubelet kubeadm kubectl
 
 if $IS_MASTER_NODE; then
-  #Initialize Kubernetes Cluster
-  kubeadm init --apiserver-advertise-address=$EXTERNAL_IP --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=all
+  #Initialize Kubernetes Cluster 
+  kubeadm init --apiserver-advertise-address=$EXTERNAL_IP --control-plane-endpoint=$EXTERNAL_IP --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=all
   export KUBECONFIG='/etc/kubernetes/admin.conf'
   #Remove the taints on the master so that you can schedule pods on it.
-  kubectl taint nodes --all node-role.kubernetes.io/master-
+  kubectl taint nodes --all node-role.kubernetes.io/master- node-role.kubernetes.io/control-plane-
   #Deploy Calico network
-  kubectl create -f https://docs.projectcalico.org/$INSTALL_CALICO_VERSION/manifests/calico.yaml
+  kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$INSTALL_CALICO_VERSION/manifests/tigera-operator.yaml
+  kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$INSTALL_CALICO_VERSION/manifests/custom-resources.yaml
+
   #Cluster join command
   kubeadm token create --print-join-command
 fi
 
 #Remove the taints on the master so that you can schedule pods on it.
-kubectl taint nodes --all node-role.kubernetes.io/master- > /dev/null 2>/dev/null
+kubectl taint nodes --all node-role.kubernetes.io/master- node-role.kubernetes.io/control-plane- > /dev/null 2>/dev/null
