@@ -220,9 +220,13 @@ sudo apt-mark hold kubelet kubeadm kubectl
 if $IS_MASTER_NODE; then
   #Initialize Kubernetes Cluster 
   kubeadm init --apiserver-advertise-address=$EXTERNAL_IP --control-plane-endpoint=$EXTERNAL_IP --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=all
+  
   export KUBECONFIG='/etc/kubernetes/admin.conf'
   #Remove the taints on the master so that you can schedule pods on it.
-  kubectl taint nodes --all node-role.kubernetes.io/master- node-role.kubernetes.io/control-plane-
+  kubectl taint nodes --all node-role.kubernetes.io/control-plane- > /dev/null 2>/dev/null
+  kubectl taint nodes --all node-role.kubernetes.io/master- > /dev/null 2>/dev/null
+  
+
   #Deploy Calico network
   kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$INSTALL_CALICO_VERSION/manifests/tigera-operator.yaml
   kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$INSTALL_CALICO_VERSION/manifests/custom-resources.yaml
@@ -232,4 +236,5 @@ if $IS_MASTER_NODE; then
 fi
 
 #Remove the taints on the master so that you can schedule pods on it.
-kubectl taint nodes --all node-role.kubernetes.io/master- node-role.kubernetes.io/control-plane- > /dev/null 2>/dev/null
+kubectl taint nodes --all node-role.kubernetes.io/control-plane- > /dev/null 2>/dev/null
+kubectl taint nodes --all node-role.kubernetes.io/master- > /dev/null 2>/dev/null
