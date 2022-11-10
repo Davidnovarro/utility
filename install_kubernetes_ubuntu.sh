@@ -157,11 +157,11 @@ ReadTextInput "Please input a unique name for a node"
 HOST_NAME=$TEXT_INPUT
 sudo hostnamectl set-hostname $HOST_NAME
 
-# EXTERNAL_IP=$(host myip.opendns.com resolver1.opendns.com | grep "myip.opendns.com has" | awk '{print $4}')
-EXTERNAL_IP=$(curl checkip.amazonaws.com)
-
 sudo apt update && sudo apt upgrade
 sudo apt -y install curl
+
+# EXTERNAL_IP=$(host myip.opendns.com resolver1.opendns.com | grep "myip.opendns.com has" | awk '{print $4}')
+EXTERNAL_IP=$(curl checkip.amazonaws.com)
 
 #Disable Firewall
 ufw disable
