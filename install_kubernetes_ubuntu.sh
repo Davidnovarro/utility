@@ -157,7 +157,8 @@ ReadTextInput "Please input a unique name for a node"
 HOST_NAME=$TEXT_INPUT
 sudo hostnamectl set-hostname $HOST_NAME
 
-EXTERNAL_IP=$(host myip.opendns.com resolver1.opendns.com | grep "myip.opendns.com has" | awk '{print $4}')
+# EXTERNAL_IP=$(host myip.opendns.com resolver1.opendns.com | grep "myip.opendns.com has" | awk '{print $4}')
+EXTERNAL_IP=$(curl checkip.amazonaws.com)
 
 sudo apt update && sudo apt upgrade
 sudo apt -y install curl
@@ -219,7 +220,7 @@ sudo apt-mark hold kubelet kubeadm kubectl
 
 if $IS_MASTER_NODE; then
   #Initialize Kubernetes Cluster 
-  kubeadm init --apiserver-advertise-address=$EXTERNAL_IP --control-plane-endpoint=$EXTERNAL_IP --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=all
+  kubeadm init --apiserver-advertise-address=$EXTERNAL_IP --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=all
   
   export KUBECONFIG='/etc/kubernetes/admin.conf'
   #Remove the taints on the master so that you can schedule pods on it.
