@@ -159,6 +159,10 @@ ReadTextInput "Please input a unique name for a node"
 HOST_NAME=$TEXT_INPUT
 sudo hostnamectl set-hostname $HOST_NAME
 
+#Adding apt repo
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+
 sudo apt update && sudo apt upgrade -y
 sudo apt -y install curl ufw
 
@@ -202,8 +206,9 @@ EOF
 sudo sysctl --system
 
 sudo apt install curl gnupg2 software-properties-common apt-transport-https ca-certificates -y
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+#Adding apt repo
+# curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+# sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 sudo apt update
 sudo apt install containerd.io -y
 mkdir -p /etc/containerd
