@@ -159,8 +159,12 @@ ReadTextInput "Please input a unique name for a node"
 HOST_NAME=$TEXT_INPUT
 sudo hostnamectl set-hostname $HOST_NAME
 
+#ISSUE: In case if this error is shown "sudo: unable to resolve host ${HOST_NAME}"
+#FIX: Set or Change the HOST_NAME in /etc/hosts so the line looks something like this "127.0.0.1 $HOST_NAME" (https://www.globo.tech/learning-center/sudo-unable-to-resolve-host-explained/)
+
 #Adding apt repo
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 
 sudo apt update && sudo apt upgrade -y
@@ -241,6 +245,11 @@ if $IS_MASTER_NODE; then
 
   #Cluster join command
   kubeadm token create --print-join-command
+
+  #Copy the config file to main folder
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
 fi
 
 #Remove the taints on the master so that you can schedule pods on it.
