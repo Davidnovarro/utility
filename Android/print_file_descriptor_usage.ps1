@@ -1,6 +1,5 @@
 while ($true) {
-    $APP_PID = "com.yourcompany.bundleid"
-    
+    $APP_PID = "com.yourcompany.bundleid"    
     $processId = $(adb shell pidof $APP_PID)
 
     if($processId)
