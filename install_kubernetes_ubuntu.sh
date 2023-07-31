@@ -164,7 +164,7 @@ sudo hostnamectl set-hostname $HOST_NAME
 
 #Adding apt repo
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-
+curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg| gpg --yes -o /usr/share/keyrings/kubernetes-archive-keyring.gpg --dearmor
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 
 sudo apt update && sudo apt upgrade -y
