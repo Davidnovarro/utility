@@ -144,7 +144,7 @@ export DEBIAN_FRONTEND="noninteractive"
 #apt-cache madison docker-ce
 #apt-cache madison kubeadm
 INSTALL_KUBE_VERSION='1.25.2-00'
-INSTALL_CALICO_VERSION='v3.24.1'
+INSTALL_CALICO_VERSION='v3.26.1'
 
 
 if [ "$(id -u)" -ne 0 ]; then
@@ -164,7 +164,7 @@ sudo hostnamectl set-hostname $HOST_NAME
 
 #Adding apt repo
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg| gpg --yes -o /usr/share/keyrings/kubernetes-archive-keyring.gpg --dearmor
+
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 
 sudo apt update && sudo apt upgrade -y
@@ -197,7 +197,22 @@ EOF
 
 sysctl --system
 
-if [[ $(tail -1 /etc/hosts) != *"${EXTERNAL_IP}"* ]]; then
+# Add required lines to /etc/hosts if they do not exts already
+if ! grep -q " localhost" "/etc/hosts" ; then
+  echo "127.0.0.1 localhost" >> "/etc/hosts"
+  echo "::1 localhost" >> "/etc/hosts"
+fi
+
+if ! grep -q " ip6-" "/etc/hosts" ; then
+  echo "# The following lines are desirable for IPv6 capable hosts" >> "/etc/hosts"
+  echo "::1     ip6-localhost ip6-loopback" >> "/etc/hosts"
+  echo "fe00::0 ip6-localnet" >> "/etc/hosts"
+  echo "ff00::0 ip6-mcastprefix" >> "/etc/hosts"
+  echo "ff02::1 ip6-allnodes" >> "/etc/hosts"
+  echo "ff02::2 ip6-allrouters" >> "/etc/hosts"
+fi
+
+if ! grep -q "${EXTERNAL_IP}" "/etc/hosts" ; then
   echo "${HOST_NAME} ${EXTERNAL_IP}" >> "/etc/hosts"
 fi
 
