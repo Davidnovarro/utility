@@ -143,7 +143,7 @@ export DEBIAN_FRONTEND="noninteractive"
 #apt update
 #apt-cache madison docker-ce
 #apt-cache madison kubeadm
-INSTALL_KUBE_VERSION='1.25.2-00'
+INSTALL_KUBE_VERSION='1.27.4-00'
 INSTALL_CALICO_VERSION='v3.26.1'
 
 
