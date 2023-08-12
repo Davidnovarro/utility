@@ -250,7 +250,12 @@ if $IS_MASTER_NODE; then
   #Remove the taints on the master so that you can schedule pods on it.
   kubectl taint nodes --all node-role.kubernetes.io/control-plane- > /dev/null 2>/dev/null
   kubectl taint nodes --all node-role.kubernetes.io/master- > /dev/null 2>/dev/null
-  
+ 
+
+  #Deploy Calico network
+  kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$INSTALL_CALICO_VERSION/manifests/tigera-operator.yaml
+  kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$INSTALL_CALICO_VERSION/manifests/custom-resources.yaml
+
   #Cluster join command
   kubeadm token create --print-join-command
 
@@ -258,10 +263,6 @@ if $IS_MASTER_NODE; then
   mkdir -p $HOME/.kube
   sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
   sudo chown $(id -u):$(id -g) $HOME/.kube/config
-
-  #Deploy Calico network
-  kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$INSTALL_CALICO_VERSION/manifests/tigera-operator.yaml
-  kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$INSTALL_CALICO_VERSION/manifests/custom-resources.yaml
 fi
 
 #Remove the taints on the master so that you can schedule pods on it.
