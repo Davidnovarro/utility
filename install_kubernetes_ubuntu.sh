@@ -162,13 +162,16 @@ sudo hostnamectl set-hostname $HOST_NAME
 #ISSUE: In case if this error is shown "sudo: unable to resolve host ${HOST_NAME}"
 #FIX: Set or Change the HOST_NAME in /etc/hosts so the line looks something like this "127.0.0.1 $HOST_NAME" (https://www.globo.tech/learning-center/sudo-unable-to-resolve-host-explained/)
 
+sudo apt update && sudo apt upgrade -y
+sudo apt-get install ca-certificates curl gnupg ufw
+
 #Adding apt repo
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --yes -o /usr/share/keyrings/kubernetes-archive-keyring.gpg --dearmor
+echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu "$(. /etc/os-release && echo $(lsb_release -cs))" stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-
-sudo apt update && sudo apt upgrade -y
-sudo apt -y install curl ufw
 
 # EXTERNAL_IP=$(host myip.opendns.com resolver1.opendns.com | grep "myip.opendns.com has" | awk '{print $4}')
 EXTERNAL_IP=$(curl checkip.amazonaws.com)
