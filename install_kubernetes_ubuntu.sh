@@ -8,7 +8,6 @@
 # https://kubernetes.io/docs/setup/production-environment/container-runtimes/
 # https://docs.docker.com/engine/install/ubuntu/
 # https://projectcalico.docs.tigera.io/getting-started/kubernetes/quickstart
-# !ATTENTION! In newer versions of CALICO (newer than v3.14) Game Servers are may be unable to send UDP packages for short period of time right after Agones Allocation is changed
 #Get script location base path
 BASE_PATH=$(readlink -f "$0" | xargs dirname)
 
@@ -201,12 +200,12 @@ EOF
 sysctl --system
 
 # Add required lines to /etc/hosts if they do not exts already
-if ! grep -q " localhost" "/etc/hosts" ; then
+if ! grep -q " localhost" "/etc/hosts"; then
   echo "127.0.0.1 localhost" >> "/etc/hosts"
   echo "::1 localhost" >> "/etc/hosts"
 fi
 
-if ! grep -q " ip6-" "/etc/hosts" ; then
+if ! grep -q "ip6-localhost" "/etc/hosts"; then
   echo "# The following lines are desirable for IPv6 capable hosts" >> "/etc/hosts"
   echo "::1     ip6-localhost ip6-loopback" >> "/etc/hosts"
   echo "fe00::0 ip6-localnet" >> "/etc/hosts"
@@ -249,7 +248,7 @@ sudo apt-mark hold kubelet kubeadm kubectl
 
 if $IS_MASTER_NODE; then
   #Initialize Kubernetes Cluster 
-  kubeadm init --apiserver-advertise-address=$EXTERNAL_IP --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=all --apiserver-cert-extra-sans=$EXTERNAL_IP
+  kubeadm init --apiserver-advertise-address=$EXTERNAL_IP --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=all #--apiserver-cert-extra-sans=$EXTERNAL_IP
   
   export KUBECONFIG='/etc/kubernetes/admin.conf'
   #Remove the taints on the master so that you can schedule pods on it.
