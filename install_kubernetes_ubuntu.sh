@@ -165,12 +165,10 @@ sudo apt update && sudo apt upgrade -y
 sudo apt-get install ca-certificates curl gnupg ufw
 
 #Adding apt repo
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --yes -o /usr/share/keyrings/kubernetes-archive-keyring.gpg --dearmor
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
 echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu "$(. /etc/os-release && echo $(lsb_release -cs))" stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 
 # EXTERNAL_IP=$(host myip.opendns.com resolver1.opendns.com | grep "myip.opendns.com has" | awk '{print $4}')
 EXTERNAL_IP=$(curl checkip.amazonaws.com)
@@ -200,7 +198,7 @@ EOF
 sysctl --system
 
 # Add required lines to /etc/hosts if they do not exts already
-if ! grep -q " localhost" "/etc/hosts"; then
+if ! grep -q "localhost" "/etc/hosts"; then
   echo "127.0.0.1 localhost" >> "/etc/hosts"
   echo "::1 localhost" >> "/etc/hosts"
 fi
@@ -215,7 +213,7 @@ if ! grep -q "ip6-localhost" "/etc/hosts"; then
 fi
 
 if ! grep -q "${EXTERNAL_IP}" "/etc/hosts" ; then
-  echo "${HOST_NAME} ${EXTERNAL_IP}" >> "/etc/hosts"
+  echo "${EXTERNAL_IP} ${HOST_NAME}" >> "/etc/hosts"
 fi
 
 #Install containerd as container runtime
@@ -228,8 +226,6 @@ sudo sysctl --system
 
 sudo apt install curl gnupg2 software-properties-common apt-transport-https ca-certificates -y
 #Adding apt repo
-# curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-# sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 sudo apt update
 sudo apt install containerd.io -y
 mkdir -p /etc/containerd
@@ -240,15 +236,15 @@ sudo systemctl enable containerd
 #Kubernetes Setup
 #Add Apt repository
 sudo apt-get install -y apt-transport-https ca-certificates curl
-sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
-echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+curl -fsSL https://dl.k8s.io/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 sudo apt-get update
 sudo apt-get install -y kubelet=$INSTALL_KUBE_VERSION kubeadm=$INSTALL_KUBE_VERSION kubectl=$INSTALL_KUBE_VERSION
 sudo apt-mark hold kubelet kubeadm kubectl
 
 if $IS_MASTER_NODE; then
   #Initialize Kubernetes Cluster 
-  kubeadm init --apiserver-advertise-address=$EXTERNAL_IP --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=all #--apiserver-cert-extra-sans=$EXTERNAL_IP
+  kubeadm init --apiserver-advertise-address=$EXTERNAL_IP --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=all --apiserver-cert-extra-sans=$EXTERNAL_IP
   
   export KUBECONFIG='/etc/kubernetes/admin.conf'
   #Remove the taints on the master so that you can schedule pods on it.
