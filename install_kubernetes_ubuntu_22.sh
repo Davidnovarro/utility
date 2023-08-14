@@ -144,9 +144,13 @@ export DEBIAN_FRONTEND="noninteractive"
 #apt update
 #apt-cache madison docker-ce
 #apt-cache madison kubeadm
-INSTALL_KUBE_VERSION='1.26.1-00' #TODO: Update... 1.26.1-00 => 1.27.4-00
-INSTALL_CALICO_VERSION='v3.26.1'
+INSTALL_KUBE_VERSION='1.27.4-00'
+INSTALL_CALICO_VERSION='3.26.1'
+CONTAINERD_VERSION="1.7.3"
+RUNC_VERSION="1.1.9"
+CNI_PLUGINS_VERSION="1.3.0"
 POD_NETWORK_CIDR='192.168.0.0/16'
+
 
 if [ "$(id -u)" -ne 0 ]; then
         echo 'This script must be run by root' >&2
@@ -195,19 +199,19 @@ printf "net.bridge.bridge-nf-call-iptables = 1\nnet.ipv4.ip_forward = 1\nnet.bri
 
 sysctl --system
 
-#TODO:  Update containerd version, CNI Plugin version, runc version
-wget https://github.com/containerd/containerd/releases/download/v1.6.16/containerd-1.6.16-linux-amd64.tar.gz -P /tmp/
-tar Cxzvf /usr/local /tmp/containerd-1.6.16-linux-amd64.tar.gz
+wget https://github.com/containerd/containerd/releases/download/v$CONTAINERD_VERSION/containerd-$CONTAINERD_VERSION-linux-amd64.tar.gz -P /tmp/
+tar Cxzvf /usr/local /tmp/containerd-$CONTAINERD_VERSION-linux-amd64.tar.gz
 wget https://raw.githubusercontent.com/containerd/containerd/main/containerd.service -P /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable --now containerd
 
-wget https://github.com/opencontainers/runc/releases/download/v1.1.4/runc.amd64 -P /tmp/
+
+wget https://github.com/opencontainers/runc/releases/download/v$RUNC_VERSION/runc.amd64 -P /tmp/
 install -m 755 /tmp/runc.amd64 /usr/local/sbin/runc
 
-wget https://github.com/containernetworking/plugins/releases/download/v1.2.0/cni-plugins-linux-amd64-v1.2.0.tgz -P /tmp/
+wget https://github.com/containernetworking/plugins/releases/download/v$CNI_PLUGINS_VERSION/cni-plugins-linux-amd64-v$CNI_PLUGINS_VERSION.tgz -P /tmp/
 mkdir -p /opt/cni/bin
-tar Cxzvf /opt/cni/bin /tmp/cni-plugins-linux-amd64-v1.2.0.tgz
+tar Cxzvf /opt/cni/bin /tmp/cni-plugins-linux-amd64-v$CNI_PLUGINS_VERSION.tgz
 
 mkdir -p /etc/containerd
 #Changing the SystemdCgroup to true
@@ -226,7 +230,7 @@ swapoff -a; sed -i '/swap/d' /etc/fstab
 
 apt-get update
 apt-get install -y apt-transport-https ca-certificates curl
-curl -fsSL https://dl.k8s.io/apt/doc/apt-key.gpg | gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg #TODO: Add override -y...
+curl -fsSL https://dl.k8s.io/apt/doc/apt-key.gpg | gpg --dearmor --batch --yes -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
 apt-get update
 apt-get install -y kubelet=$INSTALL_KUBE_VERSION kubeadm=$INSTALL_KUBE_VERSION kubectl=$INSTALL_KUBE_VERSION
@@ -243,18 +247,20 @@ if $IS_MASTER_NODE; then
  
 
   #Deploy Calico network
-  kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$INSTALL_CALICO_VERSION/manifests/tigera-operator.yaml
-  curl https://raw.githubusercontent.com/projectcalico/calico/$INSTALL_CALICO_VERSION/manifests/custom-resources.yaml | sed -e "s|192.168.0.0/16|${POD_NETWORK_CIDR}|" | kubectl create -f -
-
-  #Cluster join command
-  kubeadm token create --print-join-command
+  kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v$INSTALL_CALICO_VERSION/manifests/tigera-operator.yaml
+  curl https://raw.githubusercontent.com/projectcalico/calico/v$INSTALL_CALICO_VERSION/manifests/custom-resources.yaml | sed -e "s|192.168.0.0/16|${POD_NETWORK_CIDR}|" | kubectl create -f -
 
   #Copy the config file to main folder
   mkdir -p $HOME/.kube
   cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
   chown $(id -u):$(id -g) $HOME/.kube/config
+
+  #Print the cluster join command
+  kubeadm token create --print-join-command
 else
     # Follow the join instructions manually and then run the commands commented below
     # kubectl taint nodes --all node-role.kubernetes.io/control-plane- > /dev/null 2>/dev/null
     # kubectl taint nodes --all node-role.kubernetes.io/master- > /dev/null 2>/dev/null
 fi
+
+#TODO: Delete the /tmp/ folder 
