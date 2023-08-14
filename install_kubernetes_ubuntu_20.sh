@@ -268,3 +268,6 @@ else
     # kubectl taint nodes --all node-role.kubernetes.io/control-plane- > /dev/null 2>/dev/null
     # kubectl taint nodes --all node-role.kubernetes.io/master- > /dev/null 2>/dev/null
 fi
+
+echo "alias k='kubectl'" | tee ~/.bash_aliases
+source ~/.bash_aliases

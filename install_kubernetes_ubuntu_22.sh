@@ -224,6 +224,8 @@ ufw disable
 #Disable swap
 swapoff -a; sed -i '/swap/d' /etc/fstab
 
+sleep 15
+
 sudo apt-get update
 sudo apt-get install -y apt-transport-https ca-certificates curl gpg
 sudo curl -fsSL https://dl.k8s.io/apt/doc/apt-key.gpg | gpg --dearmor --batch --yes -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
@@ -260,6 +262,9 @@ else
     # kubectl taint nodes --all node-role.kubernetes.io/control-plane- > /dev/null 2>/dev/null
     # kubectl taint nodes --all node-role.kubernetes.io/master- > /dev/null 2>/dev/null
 fi
+
+echo "alias k='kubectl'" | tee ~/.bash_aliases
+source ~/.bash_aliases
 
 #Remove the tmp folder with all temporary files
 rm -rf /tmp/
