@@ -1,6 +1,6 @@
 # How to use?
-#       wget https://raw.githubusercontent.com/Davidnovarro/utility/main/install_kubernetes_ubuntu.sh
-#       sh install_kubernetes_ubuntu.sh
+#       wget https://raw.githubusercontent.com/Davidnovarro/utility/main/install_kubernetes_ubuntu_22.sh
+#       sh install_kubernetes_ubuntu_22.sh
 # If not a master node then, on master node create token to join the cluster: kubeadm token create --print-join-command
 # Instructions are from:
 # https://www.youtube.com/watch?v=7k9Rdlx30OY&ab_channel=Geekhead
@@ -226,7 +226,7 @@ swapoff -a; sed -i '/swap/d' /etc/fstab
 
 apt-get update
 apt-get install -y apt-transport-https ca-certificates curl
-curl -fsSL https://dl.k8s.io/apt/doc/apt-key.gpg | gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+curl -fsSL https://dl.k8s.io/apt/doc/apt-key.gpg | gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg #TODO: Add override -y...
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
 apt-get update
 apt-get install -y kubelet=$INSTALL_KUBE_VERSION kubeadm=$INSTALL_KUBE_VERSION kubectl=$INSTALL_KUBE_VERSION
