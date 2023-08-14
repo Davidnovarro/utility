@@ -140,10 +140,6 @@ RequireFolder()
 
 export DEBIAN_FRONTEND="noninteractive"
 
-#HOW TO LIST ALL THE VEERSIONS?
-#apt update
-#apt-cache madison docker-ce
-#apt-cache madison kubeadm
 INSTALL_KUBE_VERSION='1.27.4-00'
 INSTALL_CALICO_VERSION='3.26.1'
 CONTAINERD_VERSION="1.7.3"
@@ -165,8 +161,8 @@ HOST_NAME=$TEXT_INPUT
 OLD_HOST_NAME=$(hostname -s)
 hostnamectl set-hostname $HOST_NAME
 
-apt-get update
-apt-get install -y apt-transport-https ca-certificates curl
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl
 
 EXTERNAL_IP=$(curl checkip.amazonaws.com)
 
@@ -228,13 +224,14 @@ ufw disable
 #Disable swap
 swapoff -a; sed -i '/swap/d' /etc/fstab
 
-apt-get update
-apt-get install -y apt-transport-https ca-certificates curl
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl
 curl -fsSL https://dl.k8s.io/apt/doc/apt-key.gpg | gpg --dearmor --batch --yes -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
-apt-get update
-apt-get install -y kubelet=$INSTALL_KUBE_VERSION kubeadm=$INSTALL_KUBE_VERSION kubectl=$INSTALL_KUBE_VERSION
-apt-mark hold kubelet kubeadm kubectl
+sudo apt-get update
+sudo apt-get install -y kubelet=$INSTALL_KUBE_VERSION kubeadm=$INSTALL_KUBE_VERSION kubectl=$INSTALL_KUBE_VERSION
+sudo apt-mark hold kubelet kubeadm kubectl
+
 
 if $IS_MASTER_NODE; then
   #Initialize Kubernetes Cluster 
@@ -258,9 +255,11 @@ if $IS_MASTER_NODE; then
   #Print the cluster join command
   kubeadm token create --print-join-command
 else
+    echo "You need to join the master node, run this command on master to get the token: kubeadm token create --print-join-command"
     # Follow the join instructions manually and then run the commands commented below
     # kubectl taint nodes --all node-role.kubernetes.io/control-plane- > /dev/null 2>/dev/null
     # kubectl taint nodes --all node-role.kubernetes.io/master- > /dev/null 2>/dev/null
 fi
 
-#TODO: Delete the /tmp/ folder 
+#Remove the tmp folder with all temporary files
+rm -rf /tmp/
