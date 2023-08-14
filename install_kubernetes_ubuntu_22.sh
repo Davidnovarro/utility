@@ -1,6 +1,6 @@
 # How to use?
-#       wget https://raw.githubusercontent.com/Davidnovarro/utility/main/install_kubernetes_ubuntu.sh
-#       sh install_kubernetes_ubuntu.sh
+#       wget https://raw.githubusercontent.com/Davidnovarro/utility/main/install_kubernetes_ubuntu_22.sh
+#       sh install_kubernetes_ubuntu_22.sh
 # If not a master node then, on master node create token to join the cluster: kubeadm token create --print-join-command
 # Instructions are from:
 # https://www.youtube.com/watch?v=7k9Rdlx30OY&ab_channel=Geekhead
@@ -186,12 +186,12 @@ if ! grep -q "${EXTERNAL_IP}" "/etc/hosts" ; then
 fi
 
 #Prepeare to install container runtime : https://kubernetes.io/docs/setup/production-environment/container-runtimes/
-printf "overlay\nbr_netfilter\n" >> /etc/modules-load.d/containerd.conf
+printf "overlay\nbr_netfilter\n" | tee /etc/modules-load.d/containerd.conf
 
 modprobe overlay
 modprobe br_netfilter
 
-printf "net.bridge.bridge-nf-call-iptables = 1\nnet.ipv4.ip_forward = 1\nnet.bridge.bridge-nf-call-ip6tables = 1\n" >> /etc/sysctl.d/99-kubernetes-cri.conf
+printf "net.bridge.bridge-nf-call-iptables = 1\nnet.ipv4.ip_forward = 1\nnet.bridge.bridge-nf-call-ip6tables = 1\n" | tee /etc/sysctl.d/99-kubernetes-cri.conf
 
 sysctl --system
 
@@ -225,8 +225,8 @@ ufw disable
 swapoff -a; sed -i '/swap/d' /etc/fstab
 
 sudo apt-get update
-sudo apt-get install -y apt-transport-https ca-certificates curl
-curl -fsSL https://dl.k8s.io/apt/doc/apt-key.gpg | gpg --dearmor --batch --yes -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+sudo curl -fsSL https://dl.k8s.io/apt/doc/apt-key.gpg | gpg --dearmor --batch --yes -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
 sudo apt-get update
 sudo apt-get install -y kubelet=$INSTALL_KUBE_VERSION kubeadm=$INSTALL_KUBE_VERSION kubectl=$INSTALL_KUBE_VERSION
