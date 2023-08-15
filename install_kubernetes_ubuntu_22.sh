@@ -11,7 +11,15 @@
 # https://docs.docker.com/engine/install/ubuntu/
 # https://projectcalico.docs.tigera.io/getting-started/kubernetes/quickstart
 #Get script location base path
+export DEBIAN_FRONTEND="noninteractive"
 BASE_PATH=$(readlink -f "$0" | xargs dirname)
+#Make sure versions are compatible with each other
+INSTALL_KUBE_VERSION='1.26.7-00'
+INSTALL_CALICO_VERSION='3.25.1'
+CONTAINERD_VERSION="1.6.23"
+RUNC_VERSION="1.1.9"
+CNI_PLUGINS_VERSION="1.3.0"
+POD_NETWORK_CIDR='192.168.0.0/16'
 
 #region FUNCTIONS
 ReadYesNo()
@@ -138,15 +146,6 @@ RequireFolder()
 
 #endregion
 
-export DEBIAN_FRONTEND="noninteractive"
-
-INSTALL_KUBE_VERSION='1.27.4-00'
-INSTALL_CALICO_VERSION='3.26.1'
-CONTAINERD_VERSION="1.7.3"
-RUNC_VERSION="1.1.9"
-CNI_PLUGINS_VERSION="1.3.0"
-POD_NETWORK_CIDR='192.168.0.0/16'
-
 
 if [ "$(id -u)" -ne 0 ]; then
         echo 'This script must be run by root' >&2
@@ -263,8 +262,8 @@ else
     # kubectl taint nodes --all node-role.kubernetes.io/master- > /dev/null 2>/dev/null
 fi
 
-echo "alias k='kubectl'" | tee ~/.bash_aliases
-source ~/.bash_aliases
-
 #Remove the tmp folder with all temporary files
 rm -rf /tmp/
+
+echo "alias k='kubectl'" | tee ~/.bash_aliases
+source ~/.bash_aliases
