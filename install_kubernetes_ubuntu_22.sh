@@ -266,4 +266,4 @@ fi
 rm -rf /tmp/
 
 echo "alias k='kubectl'" | tee ~/.bash_aliases
-source ~/.bash_aliases
+echo 'Run this command to activate aliases: source ~/.bash_aliases' 
