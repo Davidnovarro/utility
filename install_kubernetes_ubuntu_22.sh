@@ -14,7 +14,7 @@
 export DEBIAN_FRONTEND="noninteractive"
 BASE_PATH=$(readlink -f "$0" | xargs dirname)
 #Make sure versions are compatible with each other
-INSTALL_KUBE_VERSION='1.26.7-00'
+INSTALL_KUBE_VERSION='1.27.4-00'
 INSTALL_CALICO_VERSION='3.26.1'
 CONTAINERD_VERSION="1.7.3"
 RUNC_VERSION="1.1.9"
