@@ -11,8 +11,8 @@
 # https://docs.docker.com/engine/install/ubuntu/
 # https://projectcalico.docs.tigera.io/getting-started/kubernetes/quickstart
 #Get script location base path
-export DEBIAN_FRONTEND='noninteractive'
-export NEEDRESTART_MODE='a'
+export DEBIAN_FRONTEND=noninteractive
+export NEEDRESTART_MODE=a
 BASE_PATH=$(readlink -f "$0" | xargs dirname)
 #Make sure versions are compatible with each other
 INSTALL_KUBE_VERSION='1.27.4-00'
