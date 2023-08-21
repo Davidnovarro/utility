@@ -1,5 +1,5 @@
 # How to use?
-#       wget https://raw.githubusercontent.com/Davidnovarro/utility/main/install_kubernetes_ubuntu_22.sh
+#       wget -q https://raw.githubusercontent.com/Davidnovarro/utility/main/install_kubernetes_ubuntu_22.sh
 #       sh install_kubernetes_ubuntu_22.sh
 # If not a master node then, on master node create token to join the cluster: kubeadm token create --print-join-command
 # Instructions are from:
@@ -179,19 +179,19 @@ ReadYesNo "Is this a Master Node?"
 IS_MASTER_NODE=$YES
 
 if $IS_MASTER_NODE; then
-    echo 'Please select IPVS scheduling option: https://linux.die.net/man/8/ipvsadm'
-    echo '  disabled, rr: are good options for Game Server cluster'
-    echo '  sh: Source Hashing is required for Party cluster'
+echo 'Please select IPVS scheduling option: https://linux.die.net/man/8/ipvsadm'
+echo '  disabled, rr: are good options for Game Server cluster'
+echo '  sh: Source Hashing is required for Party cluster'
 
-    # ALL_IPVS_OPTIONS="disabled sh rr wrr lc wlc lblc lblcr dh sed nq"
-    PS3='Please select IPVS scheduling option: '
-    ALL_IPVS_OPTIONS="disabled rr sh"
-    select IPVS_SCHEDULER in $ALL_IPVS_OPTIONS
-    do
-        if [[ " $ALL_IPVS_OPTIONS " = *" $IPVS_SCHEDULER "* ]]; then
-            break
-        fi
-    done
+# ALL_IPVS_OPTIONS="disabled sh rr wrr lc wlc lblc lblcr dh sed nq"
+PS3='Please select IPVS scheduling option: '
+ALL_IPVS_OPTIONS="disabled rr sh"
+select IPVS_SCHEDULER in $ALL_IPVS_OPTIONS
+do
+    if [[ " $ALL_IPVS_OPTIONS " = *" $IPVS_SCHEDULER "* ]]; then
+        break
+    fi
+done
 fi
 
 sudo apt-get -qq update
