@@ -178,7 +178,7 @@ RemoveVariable()
 
 #endregion
 
-sudo apt-get -qq update
+sudo apt-get -qq update -y
 sudo apt-get -qq install curl -y
 EXTERNAL_IP=$(curl -s checkip.amazonaws.com)
 
@@ -204,7 +204,7 @@ if [ $(GetVariable "install_kubernetes_phase" 0) = 0 ]; then
     OLD_HOST_NAME=$(hostname -s)
     hostnamectl set-hostname $HOST_NAME
 
-    sudo apt-get -qq update
+    sudo apt-get -qq update -y
     sudo apt-get install -y apt-transport-https ca-certificates curl
 
     # Add required lines to /etc/hosts if they do not exts already
@@ -227,7 +227,7 @@ if [ $(GetVariable "install_kubernetes_phase" 0) = 0 ]; then
     fi
 
     # Install IPVS
-    sudo apt-get update -y
+    sudo apt-get -qq update -y
     sudo apt-get upgrade -y
     sudo apt-get install -y ipset ipvsadm
     #Adding kernel modules required by IPVS to load on boot time
@@ -307,11 +307,11 @@ do
 done
 fi
 echo "Starting install phase 1"
-sudo apt-get -qq update
+sudo apt-get -qq update -y
 sudo apt-get install -y apt-transport-https ca-certificates curl gpg
 sudo curl -fsSL https://dl.k8s.io/apt/doc/apt-key.gpg | gpg --dearmor --batch --yes -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list > /dev/null 2>/dev/null
-sudo apt-get -qq update
+sudo apt-get -qq update -y
 sudo apt-get install -y kubelet=$INSTALL_KUBE_VERSION kubeadm=$INSTALL_KUBE_VERSION kubectl=$INSTALL_KUBE_VERSION
 sudo apt-mark hold kubelet kubeadm kubectl
 
