@@ -1,6 +1,6 @@
 # How to use?
 #       wget -q https://raw.githubusercontent.com/Davidnovarro/utility/main/install_kubernetes_ubuntu_22.sh
-#       sh install_kubernetes_ubuntu_22.sh
+#       bash install_kubernetes_ubuntu_22.sh
 # If not a master node then, on master node create token to join the cluster: kubeadm token create --print-join-command
 # Instructions are from:
 # https://www.youtube.com/watch?v=7k9Rdlx30OY&ab_channel=Geekhead
@@ -11,7 +11,8 @@
 # https://docs.docker.com/engine/install/ubuntu/
 # https://projectcalico.docs.tigera.io/getting-started/kubernetes/quickstart
 #Get script location base path
-export DEBIAN_FRONTEND="noninteractive"
+export DEBIAN_FRONTEND='noninteractive'
+export NEEDRESTART_MODE='a'
 BASE_PATH=$(readlink -f "$0" | xargs dirname)
 #Make sure versions are compatible with each other
 INSTALL_KUBE_VERSION='1.27.4-00'
@@ -20,6 +21,8 @@ CONTAINERD_VERSION="1.7.3"
 RUNC_VERSION="1.1.9"
 CNI_PLUGINS_VERSION="1.3.0"
 POD_NETWORK_CIDR='192.168.0.0/16'
+# ALL_IPVS_OPTIONS="disabled sh rr wrr lc wlc lblc lblcr dh sed nq"
+ALL_IPVS_OPTIONS="disabled rr sh"
 
 #region FUNCTIONS
 ReadYesNo()
@@ -175,25 +178,6 @@ RemoveVariable()
 
 #endregion
 
-ReadYesNo "Is this a Master Node?"
-IS_MASTER_NODE=$YES
-
-if $IS_MASTER_NODE; then
-echo 'Please select IPVS scheduling option: https://linux.die.net/man/8/ipvsadm'
-echo '  disabled, rr: are good options for Game Server cluster'
-echo '  sh: Source Hashing is required for Party cluster'
-
-# ALL_IPVS_OPTIONS="disabled sh rr wrr lc wlc lblc lblcr dh sed nq"
-PS3='Please select IPVS scheduling option: '
-ALL_IPVS_OPTIONS="disabled rr sh"
-select IPVS_SCHEDULER in $ALL_IPVS_OPTIONS
-do
-    if [[ " $ALL_IPVS_OPTIONS " = *" $IPVS_SCHEDULER "* ]]; then
-        break
-    fi
-done
-fi
-
 sudo apt-get -qq update
 sudo apt-get -qq install curl -y
 EXTERNAL_IP=$(curl -s checkip.amazonaws.com)
@@ -305,6 +289,23 @@ fi
 
 #region Install Phase 1
 if [ $(GetVariable "install_kubernetes_phase" 0) = 1 ]; then
+ReadYesNo "Is this a Master Node?"
+IS_MASTER_NODE=$YES
+
+if $IS_MASTER_NODE; then
+echo 'Please select IPVS scheduling option: https://linux.die.net/man/8/ipvsadm'
+echo '  disabled, rr: are good options for Game Server cluster'
+echo '  sh: Source Hashing is required for Party cluster'
+
+PS3='Please select IPVS scheduling option: '
+
+select IPVS_SCHEDULER in $ALL_IPVS_OPTIONS
+do
+    if [[ " $ALL_IPVS_OPTIONS " = *" $IPVS_SCHEDULER "* ]]; then
+        break
+    fi
+done
+fi
 echo "Starting install phase 1"
 sudo apt-get -qq update
 sudo apt-get install -y apt-transport-https ca-certificates curl gpg
