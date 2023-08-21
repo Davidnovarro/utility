@@ -10,6 +10,9 @@
 # https://kubernetes.io/docs/setup/production-environment/container-runtimes/
 # https://docs.docker.com/engine/install/ubuntu/
 # https://projectcalico.docs.tigera.io/getting-started/kubernetes/quickstart
+# https://youtu.be/lkXLsD6-4jA
+# https://github.com/gary-RR/myYouTube_kube-proxy_modes
+# https://devopstales.github.io/kubernetes/k8s-ipvs/
 #Get script location base path
 export DEBIAN_FRONTEND=noninteractive
 export NEEDRESTART_MODE=a
