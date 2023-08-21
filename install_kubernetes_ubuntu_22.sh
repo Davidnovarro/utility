@@ -20,6 +20,9 @@ CONTAINERD_VERSION="1.7.3"
 RUNC_VERSION="1.1.9"
 CNI_PLUGINS_VERSION="1.3.0"
 POD_NETWORK_CIDR='192.168.0.0/16'
+sudo apt-get -qq update
+sudo apt-get -qq install curl -y
+EXTERNAL_IP=$(curl -s checkip.amazonaws.com)
 
 #region FUNCTIONS
 ReadYesNo()
@@ -198,10 +201,8 @@ if [ $(GetVariable "install_kubernetes_phase" 0) = 0 ]; then
     OLD_HOST_NAME=$(hostname -s)
     hostnamectl set-hostname $HOST_NAME
 
-    sudo apt-get update
+    sudo apt-get -qq update
     sudo apt-get install -y apt-transport-https ca-certificates curl
-
-    EXTERNAL_IP=$(curl checkip.amazonaws.com)
 
     # Add required lines to /etc/hosts if they do not exts already
     if ! grep -q "localhost" "/etc/hosts"; then
@@ -271,11 +272,11 @@ fi
 
 if [ $(GetVariable "install_kubernetes_phase" 0) = 1 ]; then
     echo "Starting install phase 1"
-    sudo apt-get update
+    sudo apt-get -qq update
     sudo apt-get install -y apt-transport-https ca-certificates curl gpg
     sudo curl -fsSL https://dl.k8s.io/apt/doc/apt-key.gpg | gpg --dearmor --batch --yes -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
     echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list > /dev/null 2>/dev/null
-    sudo apt-get update
+    sudo apt-get -qq update
     sudo apt-get install -y kubelet=$INSTALL_KUBE_VERSION kubeadm=$INSTALL_KUBE_VERSION kubectl=$INSTALL_KUBE_VERSION
     sudo apt-mark hold kubelet kubeadm kubectl
 
