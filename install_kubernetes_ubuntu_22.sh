@@ -198,8 +198,9 @@ echo "alias k='kubectl'" | tee ~/.bash_aliases > /dev/null 2>/dev/null
 # Set needrestart to auto, so it wont ask any questions
 NEEDRESTART_CONF='/etc/needrestart/needrestart.conf'
 grep -v '$nrconf{restart}' $NEEDRESTART_CONF > "$NEEDRESTART_CONF.tmp"; mv "$NEEDRESTART_CONF.tmp" $NEEDRESTART_CONF
-echo '$nrconf{restart} = 'a';' >> $NEEDRESTART_CONF
+echo '$nrconf{restart} = '"'a';" >> $NEEDRESTART_CONF
 
+#'$nrconf{restart} = 'a';'
 
 if [ $(GetVariable "install_kubernetes_phase" 0) = "FINISHED" ]; then
     echo "Install phase is FINISHED"
@@ -328,7 +329,9 @@ sudo apt-get install -y kubelet=$INSTALL_KUBE_VERSION kubeadm=$INSTALL_KUBE_VERS
 sudo apt-mark hold kubelet kubeadm kubectl
 
 #Setting the MAX_PODS_PER_NODE value
-yq -i e ".maxPods=$MAX_PODS_PER_NODE" '/var/lib/kubelet/config.yaml'
+if test -f '/var/lib/kubelet/config.yaml'; then
+    yq -i e ".maxPods=$MAX_PODS_PER_NODE" '/var/lib/kubelet/config.yaml'
+fi
 
 if $IS_MASTER_NODE; then
 
@@ -342,6 +345,10 @@ apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
 networking:
   podSubnet: $POD_NETWORK_CIDR
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+maxPods: $MAX_PODS_PER_NODE
 EOF
 
 if [ $IPVS_SCHEDULER != "disabled" ]; then
