@@ -183,7 +183,6 @@ RemoveVariable()
 
 #endregion
 
-
 sudo apt-get -qq update -y
 sudo apt-get -qq install curl -y
 EXTERNAL_IP=$(curl -s checkip.amazonaws.com)
@@ -195,6 +194,12 @@ fi
 
 echo "alias k='kubectl'" | tee ~/.bash_aliases > /dev/null 2>/dev/null
 #echo 'Run this command to activate aliases: source ~/.bash_aliases'
+
+# Set needrestart to auto, so it wont ask any questions
+NEEDRESTART_CONF='/etc/needrestart/needrestart.conf'
+grep -v '$nrconf{restart}' $NEEDRESTART_CONF > "$NEEDRESTART_CONF.tmp"; mv "$NEEDRESTART_CONF.tmp" $NEEDRESTART_CONF
+echo '$nrconf{restart} = 'a';' >> $NEEDRESTART_CONF
+
 
 if [ $(GetVariable "install_kubernetes_phase" 0) = "FINISHED" ]; then
     echo "Install phase is FINISHED"
