@@ -13,6 +13,7 @@
 # https://youtu.be/lkXLsD6-4jA
 # https://github.com/gary-RR/myYouTube_kube-proxy_modes
 # https://devopstales.github.io/kubernetes/k8s-ipvs/
+# https://medium.com/@initcron/how-to-increase-the-number-of-pods-limit-per-kubernetes-node-877dcec5e4fa
 #Get script location base path
 export DEBIAN_FRONTEND=noninteractive
 export NEEDRESTART_MODE=a
@@ -24,6 +25,7 @@ CONTAINERD_VERSION="1.7.3"
 RUNC_VERSION="1.1.9"
 CNI_PLUGINS_VERSION="1.3.0"
 POD_NETWORK_CIDR='192.168.0.0/16'
+MAX_PODS_PER_NODE=512
 # ALL_IPVS_OPTIONS="disabled sh rr wrr lc wlc lblc lblcr dh sed nq"
 ALL_IPVS_OPTIONS="disabled rr sh"
 
@@ -181,6 +183,7 @@ RemoveVariable()
 
 #endregion
 
+
 sudo apt-get -qq update -y
 sudo apt-get -qq install curl -y
 EXTERNAL_IP=$(curl -s checkip.amazonaws.com)
@@ -207,8 +210,9 @@ if [ $(GetVariable "install_kubernetes_phase" 0) = 0 ]; then
     OLD_HOST_NAME=$(hostname -s)
     hostnamectl set-hostname $HOST_NAME
 
+    sudo add-apt-repository ppa:rmescandon/yq -y > /dev/null 2>/dev/null  # Adding a repo to install yaml editor yq
     sudo apt-get -qq update -y
-    sudo apt-get install -y apt-transport-https ca-certificates curl
+    sudo apt-get install -y apt-transport-https ca-certificates curl yq
 
     # Add required lines to /etc/hosts if they do not exts already
     if ! grep -q "localhost" "/etc/hosts"; then
@@ -317,6 +321,9 @@ echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://a
 sudo apt-get -qq update -y
 sudo apt-get install -y kubelet=$INSTALL_KUBE_VERSION kubeadm=$INSTALL_KUBE_VERSION kubectl=$INSTALL_KUBE_VERSION
 sudo apt-mark hold kubelet kubeadm kubectl
+
+#Setting the MAX_PODS_PER_NODE value
+yq -i e ".maxPods=$MAX_PODS_PER_NODE" '/var/lib/kubelet/config.yaml'
 
 if $IS_MASTER_NODE; then
 
