@@ -263,17 +263,17 @@ if [ $(GetVariable "install_kubernetes_phase" 0) = 0 ]; then
 
     sysctl --system
 
-    wget https://github.com/containerd/containerd/releases/download/v$CONTAINERD_VERSION/containerd-$CONTAINERD_VERSION-linux-amd64.tar.gz -P /tmp/
+    wget -q https://github.com/containerd/containerd/releases/download/v$CONTAINERD_VERSION/containerd-$CONTAINERD_VERSION-linux-amd64.tar.gz -P /tmp/
     tar Cxzvf /usr/local /tmp/containerd-$CONTAINERD_VERSION-linux-amd64.tar.gz
-    wget https://raw.githubusercontent.com/containerd/containerd/main/containerd.service -P /etc/systemd/system/
+    wget -q https://raw.githubusercontent.com/containerd/containerd/main/containerd.service -P /etc/systemd/system/
     systemctl daemon-reload
     systemctl enable --now containerd
 
 
-    wget https://github.com/opencontainers/runc/releases/download/v$RUNC_VERSION/runc.amd64 -P /tmp/
+    wget -q https://github.com/opencontainers/runc/releases/download/v$RUNC_VERSION/runc.amd64 -P /tmp/
     install -m 755 /tmp/runc.amd64 /usr/local/sbin/runc
 
-    wget https://github.com/containernetworking/plugins/releases/download/v$CNI_PLUGINS_VERSION/cni-plugins-linux-amd64-v$CNI_PLUGINS_VERSION.tgz -P /tmp/
+    wget -q https://github.com/containernetworking/plugins/releases/download/v$CNI_PLUGINS_VERSION/cni-plugins-linux-amd64-v$CNI_PLUGINS_VERSION.tgz -P /tmp/
     mkdir -p /opt/cni/bin
     tar Cxzvf /opt/cni/bin /tmp/cni-plugins-linux-amd64-v$CNI_PLUGINS_VERSION.tgz
 
