@@ -296,6 +296,7 @@ if [ $(GetVariable "install_kubernetes_phase" 0) = 0 ]; then
     rm -rf /tmp/
 
     SetVariable "install_kubernetes_phase" 1
+    echo ""
     echo "Install phase 0 is finished, please reboot and run this script again"
     exit 0
 fi
@@ -394,6 +395,7 @@ else
     # kubectl taint nodes --all node-role.kubernetes.io/control-plane- > /dev/null 2>/dev/null
     # kubectl taint nodes --all node-role.kubernetes.io/master- > /dev/null 2>/dev/null
 fi
+echo ""
 echo "Install is finished"
 SetVariable "install_kubernetes_phase" "FINISHED"
 exit 0
