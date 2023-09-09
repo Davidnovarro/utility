@@ -292,6 +292,12 @@ if [ $(GetVariable "install_kubernetes_phase" 0) = 0 ]; then
     #Disable swap
     swapoff -a; sed -i '/swap/d' /etc/fstab
     
+    sudo apt-get -qq update -y
+    sudo apt-get -qq install cron -y
+    sudo systemctl enable cron
+    # Disable swap on reboot with a Cron Job, because on some providers (example OneProvider) they enable swap reboot
+    (crontab -l 2>/dev/null;) | (grep -v "@reboot swapoff -a"; echo "@reboot swapoff -a") | crontab -
+
     #Remove the tmp folder with all temporary files
     rm -rf /tmp/
 
