@@ -184,7 +184,7 @@ RemoveVariable()
 #endregion
 
 sudo mkdir -p /tmp && chmod 1777 /tmp
-sudo apt-key adv -q --refresh-keys --keyserver keyserver.ubuntu.com
+sudo gpg -q --refresh-keys --keyserver keyserver.ubuntu.com
 sudo apt-get -qq update -y
 sudo apt-get -qq install curl -y
 EXTERNAL_IP=$(curl -s checkip.amazonaws.com)
