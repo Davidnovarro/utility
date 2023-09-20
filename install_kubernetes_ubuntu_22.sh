@@ -243,6 +243,7 @@ if [ $(GetVariable "install_kubernetes_phase" 0) = 0 ]; then
     fi
 
     # Install IPVS
+    sudo mkdir -p /tmp && chmod 1777 /tmp
     sudo apt-get -qq update -y
     sudo apt-get upgrade -y
     sudo apt-get install -y ipset ipvsadm
@@ -294,6 +295,7 @@ if [ $(GetVariable "install_kubernetes_phase" 0) = 0 ]; then
     #Disable swap
     swapoff -a; sed -i '/swap/d' /etc/fstab
     
+    sudo mkdir -p /tmp && chmod 1777 /tmp
     sudo apt-get -qq update -y
     sudo apt-get -qq install cron -y
     sudo systemctl enable cron
@@ -330,6 +332,7 @@ do
 done
 fi
 echo "Starting install phase 1"
+sudo mkdir -p /tmp && chmod 1777 /tmp
 sudo apt-get -qq update -y
 sudo apt-get install -y apt-transport-https ca-certificates curl gpg
 sudo curl -fsSL https://dl.k8s.io/apt/doc/apt-key.gpg | gpg --dearmor --batch --yes -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
