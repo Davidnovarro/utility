@@ -337,6 +337,7 @@ echo "Starting install phase 1"
 sudo mkdir -p /tmp && chmod 1777 /tmp
 sudo apt-get -qq update -y
 sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+sudo mkdir /etc/apt/keyrings/
 sudo curl -fsSL https://dl.k8s.io/apt/doc/apt-key.gpg | gpg --dearmor --batch --yes -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list > /dev/null 2>/dev/null
 sudo apt-get -qq update -y
