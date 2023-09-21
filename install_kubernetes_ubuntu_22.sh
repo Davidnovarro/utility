@@ -1,6 +1,6 @@
 # How to use?
-#       wget -q https://raw.githubusercontent.com/Davidnovarro/utility/main/install_kubernetes_ubuntu_22.sh
-#       bash install_kubernetes_ubuntu_22.sh
+#       wget -q https://raw.githubusercontent.com/Davidnovarro/utility/main/install_kubernetes_ubuntu_22.sh -O install.sh
+#       bash install.sh
 # If not a master node then, on master node create token to join the cluster: kubeadm token create --print-join-command
 # Instructions are from:
 # https://www.youtube.com/watch?v=7k9Rdlx30OY&ab_channel=Geekhead
