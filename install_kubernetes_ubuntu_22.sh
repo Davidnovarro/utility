@@ -405,9 +405,6 @@ fi
     kubeadm token create --print-join-command
 else
     echo "You need to join the master node, run this command on master to get the token: kubeadm token create --print-join-command"
-    # Follow the join instructions manually and then run the commands commented below
-    # kubectl taint nodes --all node-role.kubernetes.io/control-plane- > /dev/null 2>/dev/null
-    # kubectl taint nodes --all node-role.kubernetes.io/master- > /dev/null 2>/dev/null
 fi
 echo ""
 echo "Install is finished"
