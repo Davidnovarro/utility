@@ -1,6 +1,5 @@
 # How to use?
-#       wget -q https://raw.githubusercontent.com/Davidnovarro/utility/main/install_kubernetes_ubuntu.sh -O install.sh
-#       bash install.sh
+#       wget -q https://raw.githubusercontent.com/Davidnovarro/utility/main/install_kubernetes_ubuntu.sh -O install.sh && bash install.sh
 # If not a master node then, on master node create token to join the cluster: kubeadm token create --print-join-command
 # Instructions are from:
 # https://www.youtube.com/watch?v=7k9Rdlx30OY&ab_channel=Geekhead
@@ -195,6 +194,7 @@ if [ "$(id -u)" -ne 0 ]; then
         exit 1
 fi
 
+alias k='kubectl'
 echo "alias k='kubectl'" | tee ~/.bash_aliases > /dev/null 2>/dev/null
 #echo 'Run this command to activate aliases: source ~/.bash_aliases'
 
@@ -407,11 +407,11 @@ spec:
   calicoNetwork:
     #@davitm Modified the nodeAddressAutodetectionV4 so DNS will work for pods that are not in the same local network
     nodeAddressAutodetectionV4:
-      canReach: google.com
+      canReach: 8.8.8.8
     ipPools:
     - blockSize: 26
       cidr: $POD_NETWORK_CIDR
-      encapsulation: VXLANCrossSubnet
+      encapsulation: VXLANCrossSubnet #IPIPCrossSubnet, IPIP, VXLAN, VXLANCrossSubnet,None
       natOutgoing: Enabled
       nodeSelector: all()
 ---
@@ -424,7 +424,6 @@ EOF
 
     #Remove the taints on the master so that you can schedule pods on it.
     kubectl taint nodes --all node-role.kubernetes.io/control-plane- > /dev/null 2>/dev/null
-    kubectl taint nodes --all node-role.kubernetes.io/master- > /dev/null 2>/dev/null
 
     #Copy the config file to main folder
     mkdir -p $HOME/.kube
