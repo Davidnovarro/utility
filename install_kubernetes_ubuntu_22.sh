@@ -20,7 +20,6 @@ export NEEDRESTART_MODE=a
 BASE_PATH=$(readlink -f "$0" | xargs dirname)
 #Make sure versions are compatible with each other
 INSTALL_KUBE_VERSION='1.27.4-00'
-INSTALL_CALICO_VERSION='3.26.1'
 CONTAINERD_VERSION="1.7.3"
 RUNC_VERSION="1.1.9"
 CNI_PLUGINS_VERSION="1.3.0"
@@ -389,8 +388,31 @@ fi
     # fi
 
     #Deploy Calico network
-    kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v$INSTALL_CALICO_VERSION/manifests/tigera-operator.yaml
-    curl -s https://raw.githubusercontent.com/projectcalico/calico/v$INSTALL_CALICO_VERSION/manifests/custom-resources.yaml | sed -e "s|192.168.0.0/16|${POD_NETWORK_CIDR}|" | kubectl create -f -
+    kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml
+    #Source is from https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml
+    kubectl apply -f - <<EOF
+apiVersion: operator.tigera.io/v1
+kind: Installation
+metadata:
+  name: default
+spec:
+  calicoNetwork:
+    #@davitm Set autodetection so DNS will work for pods that are not in the same local network
+    nodeAddressAutodetectionV4:
+      canReach: google.com
+    ipPools:
+    - blockSize: 26
+      cidr: $POD_NETWORK_CIDR
+      encapsulation: VXLANCrossSubnet
+      natOutgoing: Enabled
+      nodeSelector: all()
+---
+apiVersion: operator.tigera.io/v1
+kind: APIServer
+metadata:
+  name: default
+spec: {}
+EOF
 
     #Remove the taints on the master so that you can schedule pods on it.
     kubectl taint nodes --all node-role.kubernetes.io/control-plane- > /dev/null 2>/dev/null
