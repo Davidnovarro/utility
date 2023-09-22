@@ -301,7 +301,7 @@ if [ $(GetVariable "install_kubernetes_phase" 0) = 0 ]; then
     sudo apt-get -qq install cron -y
     sudo systemctl enable cron
     # Creating cron jobs to fix issues on some provides: Disable swap, ufw, flush iptables, iptables accept all
-    #   onePpovider.com enables swap reboot
+    #   oneprovider.com enables swap reboot
     #   ovhcloud.com sometimes blocks all traffic after reboot
     (crontab -l 2>/dev/null;) | (grep -v "@reboot swapoff -a"; echo "@reboot swapoff -a") | crontab -
     (crontab -l 2>/dev/null;) | (grep -v "@reboot ufw disable"; echo "@reboot ufw disable") | crontab -
