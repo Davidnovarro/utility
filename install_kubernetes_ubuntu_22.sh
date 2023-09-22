@@ -401,7 +401,7 @@ metadata:
   name: default
 spec:
   calicoNetwork:
-    #@davitm Set autodetection so DNS will work for pods that are not in the same local network
+    #@davitm Modified the nodeAddressAutodetectionV4 so DNS will work for pods that are not in the same local network
     nodeAddressAutodetectionV4:
       canReach: google.com
     ipPools:
