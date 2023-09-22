@@ -288,13 +288,12 @@ if [ $(GetVariable "install_kubernetes_phase" 0) = 0 ]; then
         echo "Error: unable to set SystemdCgroup = true in /etc/containerd/config.toml file"
         exit 1
     fi
-    systemctl restart containerd
 
     #Disable Firewall
-    ufw disable
+    sudo ufw disable
 
     #Disable swap
-    swapoff -a; sed -i '/swap/d' /etc/fstab
+    sudo swapoff -a; sed -i '/swap/d' /etc/fstab
     
     sudo mkdir -p /tmp && chmod 1777 /tmp
     sudo apt-get -qq update -y
@@ -305,7 +304,12 @@ if [ $(GetVariable "install_kubernetes_phase" 0) = 0 ]; then
     #   ovhcloud.com sometimes blocks all traffic after reboot
     (crontab -l 2>/dev/null;) | (grep -v "@reboot swapoff -a"; echo "@reboot swapoff -a") | crontab -
     (crontab -l 2>/dev/null;) | (grep -v "@reboot ufw disable"; echo "@reboot ufw disable") | crontab -
+    (crontab -l 2>/dev/null;) | (grep -v "@reboot systemctl stop apparmor && systemctl disable apparmor"; echo "@reboot systemctl stop apparmor && systemctl disable apparmor") | crontab -
     (crontab -l 2>/dev/null;) | (grep -v "@reboot iptables -F && iptables -P INPUT ACCEPT && iptables -P OUTPUT ACCEPT && iptables -P FORWARD ACCEPT"; echo "@reboot iptables -F && iptables -P INPUT ACCEPT && iptables -P OUTPUT ACCEPT && iptables -P FORWARD ACCEPT") | crontab -
+
+    sudo systemctl stop apparmor
+    sudo systemctl disable apparmor
+    sudo systemctl restart containerd
 
     #Remove the all content from tmp folder
     find /tmp/* -delete 2>/dev/null
