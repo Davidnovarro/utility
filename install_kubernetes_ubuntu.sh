@@ -13,6 +13,7 @@
 # https://github.com/gary-RR/myYouTube_kube-proxy_modes
 # https://devopstales.github.io/kubernetes/k8s-ipvs/
 # https://medium.com/@initcron/how-to-increase-the-number-of-pods-limit-per-kubernetes-node-877dcec5e4fa
+# https://kubesail.com/blog/dedicated-kubernetes-on-hetzner
 #Get script location base path
 export DEBIAN_FRONTEND=noninteractive
 export NEEDRESTART_MODE=a
@@ -23,6 +24,7 @@ CONTAINERD_VERSION="1.7.3"
 RUNC_VERSION="1.1.9"
 CNI_PLUGINS_VERSION="1.3.0"
 POD_NETWORK_CIDR='192.168.0.0/16'
+CALICO_ENCAPSULATION='VXLAN' #IPIPCrossSubnet, IPIP, VXLAN, VXLANCrossSubnet, None : CrossSubnet means packets won't be wrapped (encapsulated) when they are on the same network (OVH cloud has issues with CrossSubnet)
 MAX_PODS_PER_NODE=512
 # ALL_IPVS_OPTIONS="disabled sh rr wrr lc wlc lblc lblcr dh sed nq"
 ALL_IPVS_OPTIONS="disabled rr sh"
@@ -194,9 +196,8 @@ if [ "$(id -u)" -ne 0 ]; then
         exit 1
 fi
 
-alias k='kubectl'
 echo "alias k='kubectl'" | tee ~/.bash_aliases > /dev/null 2>/dev/null
-#echo 'Run this command to activate aliases: source ~/.bash_aliases'
+echo 'Run this command to activate aliases: source ~/.bash_aliases'
 
 # Set needrestart to auto, so it wont ask any questions
 NEEDRESTART_CONF='/etc/needrestart/needrestart.conf'
@@ -411,8 +412,8 @@ spec:
     ipPools:
     - blockSize: 26
       cidr: $POD_NETWORK_CIDR
-      encapsulation: VXLANCrossSubnet #IPIPCrossSubnet, IPIP, VXLAN, VXLANCrossSubnet,None
-      natOutgoing: Enabled
+      encapsulation: $CALICO_ENCAPSULATION #IPIPCrossSubnet, IPIP, VXLAN, VXLANCrossSubnet, None : CrossSubnet means packets won't be wrapped (encapsulated) when they are on the same network (ovhcloud.com has issues with CrossSubnet)
+      natOutgoing: Enabled #Enabled,Disabled
       nodeSelector: all()
 ---
 apiVersion: operator.tigera.io/v1
