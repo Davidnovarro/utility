@@ -328,18 +328,18 @@ ReadYesNo "Is this a Master Node?"
 IS_MASTER_NODE=$YES
 
 if $IS_MASTER_NODE; then
-    echo 'Please select IPVS scheduling option: https://linux.die.net/man/8/ipvsadm'
-    echo '  disabled, rr: are good options for Game Server cluster'
-    echo '  sh: Source Hashing is required for Party cluster'
+echo 'Please select IPVS scheduling option: https://linux.die.net/man/8/ipvsadm'
+echo '  disabled, rr: are good options for Game Server cluster'
+echo '  sh: Source Hashing is required for Party cluster'
 
-    PS3='Please select IPVS scheduling option: '
+PS3='Please select IPVS scheduling option: '
 
-    select IPVS_SCHEDULER in $ALL_IPVS_OPTIONS
-    do
-        if [[ " $ALL_IPVS_OPTIONS " = *" $IPVS_SCHEDULER "* ]]; then
-            break
-        fi
-    done
+select IPVS_SCHEDULER in $ALL_IPVS_OPTIONS
+do
+    if [[ " $ALL_IPVS_OPTIONS " = *" $IPVS_SCHEDULER "* ]]; then
+        break
+    fi
+done
 fi
 echo "Starting install phase 1"
 sudo mkdir -p /tmp && chmod 1777 /tmp
