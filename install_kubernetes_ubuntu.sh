@@ -19,8 +19,8 @@ export DEBIAN_FRONTEND=noninteractive
 export NEEDRESTART_MODE=a
 BASE_PATH=$(readlink -f "$0" | xargs dirname)
 #Make sure versions are compatible with each other
-INSTALL_KUBE_VERSION_MAJOR='1.27'
-INSTALL_KUBE_VERSION="$INSTALL_KUBE_VERSION_MAJOR.4-1.1"
+INSTALL_KUBE_VERSION_MAJOR='1.32'
+INSTALL_KUBE_VERSION="$INSTALL_KUBE_VERSION_MAJOR.0-1.1"
 CONTAINERD_VERSION="1.7.3"
 RUNC_VERSION="1.1.9"
 CNI_PLUGINS_VERSION="1.3.0"
@@ -348,7 +348,9 @@ sudo apt-get -qq update -y
 sudo apt-get install -y apt-transport-https ca-certificates curl gpg
 sudo mkdir /etc/apt/keyrings/
 curl -fsSL https://pkgs.k8s.io/core:/stable:/v$INSTALL_KUBE_VERSION_MAJOR/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v$INSTALL_KUBE_VERSION_MAJOR/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
 sudo apt-get -qq update -y
 sudo apt-get install -y kubelet=$INSTALL_KUBE_VERSION kubeadm=$INSTALL_KUBE_VERSION kubectl=$INSTALL_KUBE_VERSION
 sudo apt-mark hold kubelet kubeadm kubectl
