@@ -222,9 +222,9 @@ if [ $(GetVariable "install_kubernetes_phase" 0) = 0 ]; then
     hostnamectl set-hostname $HOST_NAME
 
     sudo mkdir -p /tmp && chmod 1777 /tmp
-    sudo add-apt-repository ppa:rmescandon/yq -y > /dev/null 2>/dev/null  # Adding a repo to install yaml editor yq
     sudo apt-get -qq update -y
-    sudo apt-get install -y apt-transport-https ca-certificates curl yq
+    sudo apt-get install -y apt-transport-https ca-certificates curl
+    yes | sudo snap install yq > /dev/null 2>&1  #Install yaml editor yq
 
     # Add required lines to /etc/hosts if they do not exts already
     if ! grep -q "localhost" "/etc/hosts"; then
