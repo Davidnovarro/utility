@@ -20,10 +20,11 @@ export NEEDRESTART_MODE=a
 BASE_PATH=$(readlink -f "$0" | xargs dirname)
 #Make sure versions are compatible with each other
 INSTALL_KUBE_VERSION_MAJOR='1.32'
-INSTALL_KUBE_VERSION="$INSTALL_KUBE_VERSION_MAJOR.0-1.1"
-CONTAINERD_VERSION="1.7.3"
-RUNC_VERSION="1.1.9"
-CNI_PLUGINS_VERSION="1.3.0"
+INSTALL_KUBE_VERSION="$INSTALL_KUBE_VERSION_MAJOR.2-1.1"
+CONTAINERD_VERSION="2.0.3"
+RUNC_VERSION="1.2.5"
+CNI_PLUGINS_VERSION="1.6.2"
+CALICO_VERSION="3.29.2"
 POD_NETWORK_CIDR='192.168.0.0/16'
 CALICO_ENCAPSULATION='VXLAN' #IPIPCrossSubnet, IPIP, VXLAN, VXLANCrossSubnet, None : CrossSubnet means packets won't be wrapped (encapsulated) when they are on the same network (OVH cloud has issues with CrossSubnet)
 MAX_PODS_PER_NODE=512
@@ -400,8 +401,8 @@ fi
     # fi
 
     #Deploy Calico network
-    kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/tigera-operator.yaml
-    #Source is from https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/custom-resources.yaml
+    kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v$CALICO_VERSION/manifests/tigera-operator.yaml
+    #Source is from https://raw.githubusercontent.com/projectcalico/calico/v3.29.2/manifests/custom-resources.yaml
     kubectl apply -f - <<EOF
 apiVersion: operator.tigera.io/v1
 kind: Installation
