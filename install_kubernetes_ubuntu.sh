@@ -374,12 +374,12 @@ fi
 if $IS_MASTER_NODE; then
 
 cat > kubeadm.yaml <<EOF
-apiVersion: kubeadm.k8s.io/v1beta3
+apiVersion: kubeadm.k8s.io/v1beta4
 kind: InitConfiguration
 localAPIEndpoint:
   advertiseAddress: $EXTERNAL_IP
 ---
-apiVersion: kubeadm.k8s.io/v1beta3
+apiVersion: kubeadm.k8s.io/v1beta4
 kind: ClusterConfiguration
 networking:
   podSubnet: $POD_NETWORK_CIDR
@@ -424,7 +424,8 @@ spec:
     nodeAddressAutodetectionV4:
       canReach: 8.8.8.8
     ipPools:
-    - blockSize: 26
+    - name: default-ipv4-ippool
+      blockSize: 26
       cidr: $POD_NETWORK_CIDR
       encapsulation: $CALICO_ENCAPSULATION #IPIPCrossSubnet, IPIP, VXLAN, VXLANCrossSubnet, None : CrossSubnet means packets won't be wrapped (encapsulated) when they are on the same network (ovhcloud.com has issues with CrossSubnet)
       natOutgoing: Enabled #Enabled,Disabled
