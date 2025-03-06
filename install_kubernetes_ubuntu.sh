@@ -286,9 +286,19 @@ if [ $(GetVariable "install_kubernetes_phase" 0) = 0 ]; then
 
     mkdir -p /etc/containerd
     #Changing the SystemdCgroup to true
-    containerd config default | sed -e 's|SystemdCgroup = false|SystemdCgroup = true|' | tee /etc/containerd/config.toml > /dev/null 2>/dev/null
-    if ! grep -q "SystemdCgroup = true" "/etc/containerd/config.toml"; then
-        echo "Error: unable to set SystemdCgroup = true in /etc/containerd/config.toml file"
+    CONTAINERD_CONFIG_FILE="/etc/containerd/config.toml"
+    containerd config default | sed -e 's|SystemdCgroup = false|SystemdCgroup = true|' | tee $CONTAINERD_CONFIG_FILE > /dev/null 2>/dev/null
+    #if SystemdCgroup was not defined in default config file then add it
+    if ! grep -q "SystemdCgroup = true" $CONTAINERD_CONFIG_FILE; then
+        sed -i '/ShimCgroup =/a \            SystemdCgroup = true' "$CONTAINERD_CONFIG_FILE"
+    fi
+    if ! grep -q "SystemdCgroup = true" $CONTAINERD_CONFIG_FILE; then
+        echo "Error: unable to set SystemdCgroup = true in $CONTAINERD_CONFIG_FILE file"
+        exit 1
+    fi
+
+    if (! grep -q "runtime_type = 'io.containerd.runc.v2'" $CONTAINERD_CONFIG_FILE) && (! grep -q 'runtime_type = "io.containerd.runc.v2"' $CONTAINERD_CONFIG_FILE); then
+        echo "Error: 'runtime_type' sould be set to 'io.containerd.runc.v2' in the $CONTAINERD_CONFIG_FILE file"
         exit 1
     fi
 
