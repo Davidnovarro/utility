@@ -6,6 +6,14 @@ if [ "$(id -u)" -ne 0 ]; then
         exit 1
 fi
 
+# If Master Node
+# kubectl delete all --all
+# kubectl delete all --all -n {namespace}
+# If the cluster is node, First delete it from master
+# kubectl drain <node name> --delete-emptydir-data --ignore-daemonsets
+# kubectl delete node <node name>
+
+
 printf 'y\n' | kubeadm reset
 
 apt-get purge -y docker-ce containerd.io

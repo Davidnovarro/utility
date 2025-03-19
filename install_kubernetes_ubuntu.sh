@@ -413,6 +413,7 @@ fi
     #Deploy Calico network
     kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v$CALICO_VERSION/manifests/tigera-operator.yaml
     #Source is from https://raw.githubusercontent.com/projectcalico/calico/v3.29.2/manifests/custom-resources.yaml
+    sleep 30
     kubectl apply -f - <<EOF
 apiVersion: operator.tigera.io/v1
 kind: Installation
