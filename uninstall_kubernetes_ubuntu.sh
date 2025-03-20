@@ -24,5 +24,14 @@ rm -rf /etc/cni/net.d
 rm -rf /etc/kubernetes
 rm -rf ~/.kube
 
+
+sudo systemctl stop containerd
+sudo systemctl disable containerd
+sudo apt-get remove --purge -y containerd
+
+sudo rm -rf /var/lib/containerd
+sudo rm -rf /etc/containerd
+sudo rm -rf /usr/local/bin/containerd*
+
 iptables -F
 ufw enable
