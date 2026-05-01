@@ -19,12 +19,12 @@ export DEBIAN_FRONTEND=noninteractive
 export NEEDRESTART_MODE=a
 BASE_PATH=$(readlink -f "$0" | xargs dirname)
 #Make sure versions are compatible with each other
-INSTALL_KUBE_VERSION_MAJOR='1.32'
-INSTALL_KUBE_VERSION="$INSTALL_KUBE_VERSION_MAJOR.2-1.1"
-CONTAINERD_VERSION="2.0.3"
-RUNC_VERSION="1.2.5"
-CNI_PLUGINS_VERSION="1.6.2"
-CALICO_VERSION="3.29.2"
+INSTALL_KUBE_VERSION_MAJOR='1.35'
+INSTALL_KUBE_VERSION="$INSTALL_KUBE_VERSION_MAJOR.3-1.1"
+CONTAINERD_VERSION="2.1.7"
+RUNC_VERSION="1.4.2"
+CNI_PLUGINS_VERSION="1.9.1"
+CALICO_VERSION="3.31.5"
 POD_NETWORK_CIDR='192.168.0.0/16'
 CALICO_ENCAPSULATION='VXLAN' #IPIPCrossSubnet, IPIP, VXLAN, VXLANCrossSubnet, None : CrossSubnet means packets won't be wrapped (encapsulated) when they are on the same network (OVH cloud has issues with CrossSubnet)
 MAX_PODS_PER_NODE=512
@@ -266,13 +266,21 @@ if [ $(GetVariable "install_kubernetes_phase" 0) = 0 ]; then
     modprobe overlay
     modprobe br_netfilter
 
-    printf "net.bridge.bridge-nf-call-iptables = 1\nnet.ipv4.ip_forward = 1\nnet.bridge.bridge-nf-call-ip6tables = 1\n" | tee /etc/sysctl.d/99-kubernetes-cri.conf > /dev/null 2>/dev/null
+sudo tee /etc/sysctl.d/99-kubernetes.conf >/dev/null <<'EOF'
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+fs.inotify.max_user_instances       = 8192
+fs.inotify.max_user_watches         = 1048576
+EOF
 
-    sysctl --system
+    sudo sysctl --system
 
     wget -q https://github.com/containerd/containerd/releases/download/v$CONTAINERD_VERSION/containerd-$CONTAINERD_VERSION-linux-amd64.tar.gz -P /tmp/
     tar Cxzvf /usr/local /tmp/containerd-$CONTAINERD_VERSION-linux-amd64.tar.gz
-    wget -q https://raw.githubusercontent.com/containerd/containerd/main/containerd.service -P /etc/systemd/system/
+    # Pin to the release branch matching CONTAINERD_VERSION so upstream changes to main can't break this.
+    CONTAINERD_RELEASE_BRANCH="release/$(echo $CONTAINERD_VERSION | cut -d. -f1,2)"
+    wget -q https://raw.githubusercontent.com/containerd/containerd/$CONTAINERD_RELEASE_BRANCH/containerd.service -P /etc/systemd/system/
     systemctl daemon-reload
     systemctl enable --now containerd
 
@@ -357,7 +365,7 @@ echo "Starting install phase 1"
 sudo mkdir -p /tmp && chmod 1777 /tmp
 sudo apt-get -qq update -y
 sudo apt-get install -y apt-transport-https ca-certificates curl gpg
-sudo mkdir /etc/apt/keyrings/
+sudo mkdir -p /etc/apt/keyrings/
 curl -fsSL https://pkgs.k8s.io/core:/stable:/v$INSTALL_KUBE_VERSION_MAJOR/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v$INSTALL_KUBE_VERSION_MAJOR/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
